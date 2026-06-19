@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SnapToCompare AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:#000;min-height:100vh;transition:background .3s,color .3s}
+body.dark{background:#0f0f0f;color:#f0f0f0}
+body.dark nav,body.dark .upload-page-nav{background:#0f0f0f;border-color:#222}
+body.dark .upload-card{background:#1a1a1a}
+body.dark .card-btn{background:#111;border-color:#333}
+body.dark .card-btn span{color:#f0f0f0}
+body.dark .name-input{background:#111;border-color:#333;color:#f0f0f0}
+body.dark .result-col{background:#1a1a1a}
+body.dark .result-col ul li{color:#bbb}
+body.dark .loading-box{background:#1a1a1a;color:#888}
+body.dark .chat-panel{border-color:#333}
+body.dark .chat-messages{background:#111}
+body.dark .chat-msg.ai{background:#1a1a1a;border-color:#333;color:#eee}
+body.dark .chat-input-row{background:#0f0f0f;border-color:#222}
+body.dark .chat-input{background:#111;border-color:#333;color:#f0f0f0}
+body.dark .chat-expired{background:#111;border-color:#222}
+body.dark .chat-trigger{background:#111;border-color:#444;color:#f0f0f0}
+body.dark .no-photo-banner{background:#2a2000;border-color:#554400;color:#ccaa00}
+body.dark .compare-again-btn{background:#1a1a1a;border-color:#333;color:#f0f0f0}
+body.dark .history-section{border-color:#222}
+body.dark .history-item{background:#1a1a1a;border-color:#222}
+body.dark .history-item:hover{background:#222}
+body.dark .paywall-card{background:#1a1a1a;color:#f0f0f0}
+body.dark .paywall-card p{color:#aaa}
+body.dark .price-pill{border-color:#444}
+body.dark footer{border-color:#222}
+body.dark footer .links a{color:#555}
+body.dark .share-inner{background:#1a1a1a}
+body.dark .share-actions button.sec{background:#111;border-color:#333;color:#f0f0f0}
+body.dark .pg-nav{border-color:#222}
+body.dark .pricing-card{border-color:#333}
+body.dark .pricing-card:not(.featured){background:#1a1a1a}
+body.dark .faq-item{border-color:#222}
+body.dark .about-card{background:#1a1a1a}
+body.dark .about-mission{background:#fff;color:#000}
+body.dark .big-upload-btn{background:#1a1a1a;border-color:#333}
+body.dark .big-upload-btn .big-label{color:#f0f0f0}
+body.dark .upload-name-input{background:#111;border-color:#333;color:#f0f0f0}
+
+/* DARK TOGGLE */
+.dark-toggle{background:none;border:1px solid #ddd;border-radius:999px;padding:6px 14px;font-size:13px;cursor:pointer;color:#555;transition:all .15s}
+.dark-toggle:hover{background:#f5f5f5;color:#000}
+body.dark .dark-toggle{border-color:#444;color:#888}
+body.dark .dark-toggle:hover{background:#222;color:#f0f0f0}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:100;transition:background .3s,border-color .3s}
+.logo{font-size:16px;font-weight:700;letter-spacing:-.3px;cursor:pointer}
+.logo span{color:#888}
+.nav-links{display:flex;gap:8px;align-items:center}
+.nav-pill{padding:6px 16px;border-radius:999px;border:1px solid #e5e5e5;background:transparent;font-size:13px;color:#888;cursor:pointer;transition:all .15s}
+.nav-pill:hover{background:#f5f5f5;color:#000}
+body.dark .nav-pill{border-color:#333;color:#888}
+body.dark .nav-pill:hover{background:#1a1a1a;color:#f0f0f0}
+.nav-cta{padding:8px 18px;border-radius:999px;background:#000;color:#fff;border:none;font-size:13px;font-weight:500;cursor:pointer}
+body.dark .nav-cta{background:#fff;color:#000}
+
+/* PAGES */
+.page{display:none;min-height:100vh}
+.page.active{display:block}
+
+/* HERO */
+.hero{text-align:center;padding:60px 20px 30px}
+.hero h1{font-size:38px;font-weight:800;letter-spacing:-1px;line-height:1.1}
+.hero p{font-size:20px;color:#888;margin-top:8px;font-weight:600}
+.hero-btns{display:flex;gap:10px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+.btn-black{padding:10px 22px;border-radius:999px;background:#000;color:#fff;border:none;font-size:14px;font-weight:500;cursor:pointer}
+body.dark .btn-black{background:#fff;color:#000}
+.btn-outline{padding:10px 22px;border-radius:999px;background:transparent;color:#000;border:1px solid #ddd;font-size:14px;font-weight:500;cursor:pointer}
+body.dark .btn-outline{border-color:#444;color:#f0f0f0}
+
+/* COMPARE */
+.compare-section{padding:30px 40px 60px;max-width:900px;margin:0 auto}
+.usage-bar{text-align:center;margin-bottom:20px}
+.usage-text{font-size:13px;color:#888}
+.usage-count{font-weight:700;color:#000}
+body.dark .usage-count{color:#fff}
+.no-photo-banner{display:none;background:#fffbeb;border:1px solid #f0d060;border-radius:12px;padding:10px 16px;font-size:13px;color:#7a6000;margin-bottom:14px;text-align:center}
+.cards-row{display:flex;align-items:stretch;gap:0}
+.upload-card{flex:1;background:#F4F4F2;border-radius:16px;padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;border:2px solid transparent;transition:border .2s,background .3s;min-height:300px;justify-content:center}
+.upload-card.active{border:2px solid #000}
+body.dark .upload-card.active{border-color:#fff}
+.upload-card>label{font-size:11px;font-weight:700;letter-spacing:1px;color:#888;text-transform:uppercase;align-self:flex-start}
+.card-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border-radius:12px;padding:18px 28px;cursor:pointer;border:1px solid #e5e5e5;width:100%;transition:background .15s}
+.card-btn:hover{background:#f0f0f0}
+.card-btn svg{width:26px;height:26px}
+.card-btn span{font-size:13px;font-weight:500;color:#000}
+body.dark .card-btn span{color:#f0f0f0}
+.card-btn small{font-size:11px;color:#aaa}
+.preview-img{width:100%;max-height:140px;object-fit:cover;border-radius:10px;display:none}
+.name-input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid #e5e5e5;font-size:13px;background:#fff;color:#000;outline:none;margin-top:4px;cursor:pointer;transition:all .2s}
+.name-input::placeholder{color:#bbb}
+.vs-badge{display:flex;align-items:center;justify-content:center;width:54px;flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.vs-inner{background:#000;color:#fff;font-size:13px;font-weight:800;border-radius:999px;padding:8px 12px;letter-spacing:1px}
+body.dark .vs-inner{background:#fff;color:#000}
+.compare-btn{display:block;width:100%;margin-top:24px;padding:14px;border-radius:999px;background:#000;color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.compare-btn:disabled{opacity:.35;cursor:not-allowed}
+body.dark .compare-btn{background:#fff;color:#000}
+
+/* RESULTS */
+.result-box{margin-top:28px;display:none}
+.result-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.result-col{background:#F4F4F2;border-radius:16px;padding:20px;transition:background .3s}
+.result-col-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:10px}
+.result-col-name{font-size:15px;font-weight:800;margin-bottom:10px}
+.result-col ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
+.result-col ul li{font-size:13px;color:#444;line-height:1.5;padding-left:14px;position:relative}
+.result-col ul li::before{content:'•';position:absolute;left:0;color:#000;font-weight:700}
+body.dark .result-col ul li::before{color:#fff}
+.score-row{margin-top:14px;display:flex;align-items:center;gap:10px}
+.score-label{font-size:11px;font-weight:700;color:#888;white-space:nowrap}
+.score-bar-bg{flex:1;height:6px;background:#e5e5e5;border-radius:999px;overflow:hidden}
+body.dark .score-bar-bg{background:#333}
+.score-bar-fill{height:100%;border-radius:999px;background:#000;width:0%;transition:width .9s ease}
+body.dark .score-bar-fill{background:#fff}
+.score-num{font-size:13px;font-weight:800;min-width:28px;text-align:right}
+.winner-box{background:#000;color:#fff;border-radius:16px;padding:24px;text-align:center}
+body.dark .winner-box{background:#fff;color:#000}
+.winner-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.6;margin-bottom:6px}
+.winner-name{font-size:22px;font-weight:800;margin-bottom:10px}
+.winner-trophy{font-size:32px;margin-bottom:8px}
+.winner-reason{font-size:14px;line-height:1.6;opacity:.85}
+.loading-box{background:#F4F4F2;border-radius:16px;padding:40px;text-align:center;font-size:14px;color:#888}
+@keyframes dots{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+.loading-dots::after{content:'';animation:dots 1.2s steps(3,end) infinite}
+
+/* RESULT ACTIONS */
+.result-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.compare-again-btn{flex:1;padding:13px;border-radius:999px;background:#fff;border:1.5px solid #ddd;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+.compare-again-btn:hover{background:#f5f5f5}
+.share-btn{flex:1;padding:13px;border-radius:999px;background:#000;color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+body.dark .share-btn{background:#fff;color:#000}
+.share-btn svg,.compare-again-btn svg{width:16px;height:16px}
+
+/* CHAT */
+.chat-trigger{display:none;margin-top:12px;width:100%;padding:14px 20px;border-radius:999px;background:#fff;border:1.5px solid #000;font-size:14px;font-weight:600;cursor:pointer;align-items:center;justify-content:center;gap:10px;transition:background .15s}
+body.dark .chat-trigger{background:#111;border-color:#555;color:#f0f0f0}
+.chat-trigger:hover{background:#f5f5f5}
+.chat-trigger.visible{display:flex}
+.chat-panel{display:none;margin-top:16px;border:1.5px solid #eee;border-radius:20px;overflow:hidden;flex-direction:column}
+.chat-panel.open{display:flex}
+.chat-header{background:#000;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+body.dark .chat-header{background:#fff;color:#000}
+.chat-header-left{display:flex;align-items:center;gap:10px}
+.chat-header-title{font-size:14px;font-weight:700}
+.chat-timer{font-size:12px;font-weight:600;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:999px;font-variant-numeric:tabular-nums}
+body.dark .chat-header .chat-timer{background:rgba(0,0,0,.1)}
+.chat-timer.urgent{background:rgba(255,80,80,.3);color:#ffaaaa}
+.chat-messages{height:320px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#fafafa}
+body.dark .chat-messages{background:#111}
+.chat-msg{max-width:78%;padding:11px 15px;border-radius:16px;font-size:13px;line-height:1.55}
+.chat-msg.ai{background:#fff;border:1px solid #eee;color:#222;align-self:flex-start;border-bottom-left-radius:4px}
+body.dark .chat-msg.ai{background:#1a1a1a;border-color:#333;color:#eee}
+.chat-msg.user{background:#000;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+body.dark .chat-msg.user{background:#fff;color:#000}
+.chat-msg.typing{opacity:.6}
+.chat-input-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid #eee;background:#fff}
+body.dark .chat-input-row{background:#0f0f0f;border-color:#222}
+.chat-input{flex:1;padding:10px 14px;border-radius:999px;border:1px solid #e5e5e5;font-size:13px;outline:none;font-family:inherit}
+body.dark .chat-input{background:#111;border-color:#333;color:#f0f0f0}
+.chat-input:focus{border-color:#000}
+body.dark .chat-input:focus{border-color:#fff}
+.chat-send{padding:10px 18px;border-radius:999px;background:#000;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer}
+body.dark .chat-send{background:#fff;color:#000}
+.chat-send:disabled{opacity:.35;cursor:not-allowed}
+.chat-expired{display:none;padding:20px;text-align:center;background:#fafafa;border-top:1px solid #eee}
+body.dark .chat-expired{background:#111;border-color:#222}
+.chat-expired p{font-size:13px;color:#666;margin-bottom:12px}
+.chat-expired button{padding:10px 22px;border-radius:999px;background:#000;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer}
+body.dark .chat-expired button{background:#fff;color:#000}
+
+/* HISTORY */
+.history-section{margin-top:40px;padding-top:32px;border-top:1px solid #eee}
+body.dark .history-section{border-color:#222}
+.history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.history-title{font-size:14px;font-weight:700}
+.history-clear{font-size:12px;color:#aaa;cursor:pointer;background:none;border:none}
+.history-clear:hover{color:red}
+.history-list{display:flex;flex-direction:column;gap:8px}
+.history-item{background:#F4F4F2;border:1px solid #eee;border-radius:14px;padding:14px 18px;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:space-between;gap:12px}
+body.dark .history-item{background:#1a1a1a;border-color:#333}
+.history-item:hover{background:#ebebeb}
+body.dark .history-item:hover{background:#222}
+.history-names{font-size:14px;font-weight:600}
+.history-winner{font-size:12px;color:#888;margin-top:2px}
+.history-date{font-size:11px;color:#bbb;white-space:nowrap}
+
+/* SHARE OVERLAY */
+.share-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:600;align-items:center;justify-content:center;padding:20px}
+.share-overlay.show{display:flex}
+.share-inner{background:#fff;border-radius:24px;width:100%;max-width:400px;overflow:hidden}
+body.dark .share-inner{background:#1a1a1a}
+.share-preview{background:#000;color:#fff;padding:28px 24px;text-align:center}
+body.dark .share-preview{background:#fff;color:#000}
+.share-badge{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.5;margin-bottom:16px}
+.share-vs-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.share-prod{font-size:15px;font-weight:800}
+.share-vs-pill{font-size:11px;font-weight:800;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:999px}
+body.dark .share-preview .share-vs-pill{background:rgba(0,0,0,.12)}
+.share-trophy{font-size:26px;margin-bottom:6px}
+.share-winner-label{font-size:10px;opacity:.6;margin-bottom:4px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.share-winner-name{font-size:20px;font-weight:800;margin-bottom:6px}
+.share-winner-reason{font-size:12px;opacity:.75;line-height:1.5;max-width:280px;margin:0 auto}
+.share-actions{padding:16px 20px;display:flex;gap:10px}
+.share-actions button{flex:1;padding:11px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer}
+.share-actions button.sec{background:#fff;border:1px solid #ddd;color:#000}
+.share-actions button.pri{background:#000;color:#fff;border:none}
+body.dark .share-actions button.pri{background:#fff;color:#000}
+.share-close-row{text-align:center;padding-bottom:16px}
+.share-close-row button{background:none;border:none;font-size:13px;color:#aaa;cursor:pointer}
+
+/* UPLOAD PAGE */
+#page-upload{background:#fff;position:fixed;inset:0;z-index:300;overflow-y:auto;display:none;flex-direction:column}
+body.dark #page-upload{background:#0f0f0f}
+#page-upload.active{display:flex}
+.upload-page-nav{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:10}
+body.dark .upload-page-nav{background:#0f0f0f;border-color:#222}
+.back-btn{display:flex;align-items:center;gap:8px;background:none;border:none;font-size:14px;font-weight:500;cursor:pointer;color:#000;padding:6px 0}
+body.dark .back-btn{color:#f0f0f0}
+.back-btn svg{width:18px;height:18px}
+.upload-page-title{font-size:15px;font-weight:700}
+.upload-page-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;gap:20px;max-width:480px;margin:0 auto;width:100%}
+.upload-page-label{font-size:12px;font-weight:700;letter-spacing:1px;color:#888;text-transform:uppercase;align-self:flex-start}
+.big-upload-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%;background:#F4F4F2;border:2px dashed #ddd;border-radius:20px;padding:40px 20px;cursor:pointer;transition:all .2s}
+.big-upload-btn:hover{background:#eee;border-color:#aaa}
+body.dark .big-upload-btn:hover{background:#222;border-color:#555}
+.big-upload-btn svg{width:40px;height:40px;stroke:#555}
+.big-upload-btn .big-label{font-size:16px;font-weight:600;color:#000}
+body.dark .big-upload-btn .big-label{color:#f0f0f0}
+.big-upload-btn .big-sub{font-size:13px;color:#aaa}
+.upload-or{font-size:13px;color:#bbb;font-weight:600}
+.upload-preview-wrap{width:100%;border-radius:16px;overflow:hidden;display:none;position:relative}
+.upload-preview-wrap img{width:100%;max-height:280px;object-fit:cover;display:block;border-radius:16px}
+.change-photo-btn{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer}
+.upload-name-input{width:100%;padding:12px 16px;border-radius:12px;border:1px solid #e5e5e5;font-size:14px;background:#fff;color:#000;outline:none}
+body.dark .upload-name-input{background:#111;border-color:#333;color:#f0f0f0}
+.upload-name-input:focus{border-color:#000}
+body.dark .upload-name-input:focus{border-color:#fff}
+.upload-name-input::placeholder{color:#bbb}
+.confirm-btn{width:100%;padding:14px;border-radius:999px;background:#000;color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+body.dark .confirm-btn{background:#fff;color:#000}
+.confirm-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* PRICING PAGE */
+.pg-nav{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:1px solid #eee}
+body.dark .pg-nav{border-color:#222}
+.pricing-hero{text-align:center;padding:60px 20px 40px}
+.pricing-hero h1{font-size:36px;font-weight:800;letter-spacing:-1px}
+.pricing-hero p{font-size:16px;color:#888;margin-top:10px}
+.pricing-cards{display:flex;gap:20px;justify-content:center;padding:0 40px 60px;flex-wrap:wrap;max-width:820px;margin:0 auto}
+.pricing-card{flex:1;min-width:260px;max-width:340px;border:1px solid #eee;border-radius:20px;padding:32px 28px}
+body.dark .pricing-card:not(.featured){border-color:#333;background:#1a1a1a}
+.pricing-card.featured{background:#000;color:#fff;border-color:#000}
+.pricing-card .tier{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.6;margin-bottom:12px}
+.pricing-card .price{font-size:42px;font-weight:800;letter-spacing:-2px;line-height:1}
+.pricing-card .price sup{font-size:20px;vertical-align:super}
+.pricing-card .price-sub{font-size:13px;opacity:.6;margin-top:4px;margin-bottom:20px}
+.pricing-card hr{border:none;border-top:1px solid #eee;margin:20px 0}
+.pricing-card.featured hr{border-color:rgba(255,255,255,.2)}
+.pricing-card ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+.pricing-card ul li{font-size:14px;display:flex;align-items:center;gap:10px;opacity:.85}
+.pricing-card ul li .ck{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px}
+.pricing-card:not(.featured) ul li .ck{background:#F4F4F2;color:#000}
+body.dark .pricing-card:not(.featured) ul li .ck{background:#333;color:#f0f0f0}
+.pricing-card.featured ul li .ck{background:rgba(255,255,255,.2);color:#fff}
+.pricing-cta{width:100%;padding:13px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;border:none}
+.pricing-card:not(.featured) .pricing-cta{background:#000;color:#fff}
+body.dark .pricing-card:not(.featured) .pricing-cta{background:#fff;color:#000}
+.pricing-card.featured .pricing-cta{background:#fff;color:#000}
+.pricing-faq{max-width:600px;margin:0 auto;padding:0 40px 60px}
+.pricing-faq h2{font-size:20px;font-weight:800;margin-bottom:20px;text-align:center}
+.faq-item{border-top:1px solid #eee;padding:16px 0}
+body.dark .faq-item{border-color:#222}
+.faq-item:last-child{border-bottom:1px solid #eee}
+body.dark .faq-item:last-child{border-color:#222}
+.faq-q{font-size:14px;font-weight:600;margin-bottom:6px}
+.faq-a{font-size:13px;color:#888;line-height:1.6}
+
+/* ABOUT */
+.about-hero{text-align:center;padding:60px 40px 40px;max-width:700px;margin:0 auto}
+.about-hero h1{font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:14px}
+.about-hero p{font-size:16px;color:#555;line-height:1.8}
+body.dark .about-hero p{color:#aaa}
+.about-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;max-width:820px;margin:0 auto;padding:0 40px 60px}
+.about-card{background:#F4F4F2;border-radius:16px;padding:28px 24px}
+.about-card .icon{font-size:28px;margin-bottom:14px}
+.about-card h3{font-size:16px;font-weight:800;margin-bottom:8px}
+.about-card p{font-size:13px;color:#888;line-height:1.6}
+.about-team{max-width:700px;margin:0 auto;padding:0 40px 60px;text-align:center}
+.about-team h2{font-size:22px;font-weight:800;margin-bottom:10px}
+.about-team p{font-size:14px;color:#888;line-height:1.7}
+.about-mission{background:#000;color:#fff;border-radius:20px;max-width:700px;margin:0 auto 60px;padding:40px;text-align:center}
+.about-mission h2{font-size:24px;font-weight:800;margin-bottom:12px}
+.about-mission p{font-size:14px;opacity:.8;line-height:1.7}
+
+/* WEBCAM */
+.webcam-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.webcam-overlay.show{display:flex}
+.webcam-box{background:#000;border-radius:20px;overflow:hidden;width:min(480px,90vw)}
+.webcam-box video{width:100%;display:block}
+.webcam-box canvas{display:none}
+.webcam-controls{display:flex;gap:12px;align-items:center;justify-content:center}
+.snap-btn{width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid #ccc;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s}
+.snap-btn:hover{transform:scale(1.05)}
+.snap-btn svg{width:28px;height:28px}
+.webcam-cancel{padding:10px 22px;border-radius:999px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:13px;cursor:pointer}
+.webcam-tip{font-size:13px;color:rgba(255,255,255,.5);text-align:center}
+.webcam-err{font-size:13px;color:#ff6b6b;text-align:center;padding:20px;display:none}
+
+/* PAYWALL */
+.paywall-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;align-items:center;justify-content:center}
+.paywall-overlay.show{display:flex}
+.paywall-card{background:#fff;border-radius:20px;padding:36px 32px;max-width:380px;width:90%;text-align:center}
+body.dark .paywall-card{background:#1a1a1a;color:#f0f0f0}
+.paywall-card h2{font-size:22px;font-weight:800;margin-bottom:8px}
+.paywall-card p{font-size:14px;color:#666;margin-bottom:6px;line-height:1.6}
+body.dark .paywall-card p{color:#aaa}
+.price-row{display:flex;gap:12px;justify-content:center;margin:20px 0}
+.price-pill{flex:1;border:1px solid #e5e5e5;border-radius:14px;padding:14px 10px;cursor:pointer;transition:all .15s}
+body.dark .price-pill{border-color:#444}
+.price-pill.selected{border:2px solid #000;background:#000;color:#fff}
+body.dark .price-pill.selected{border-color:#fff;background:#fff;color:#000}
+.price-pill .amount{font-size:20px;font-weight:800;display:block}
+.price-pill .plabel{font-size:11px;opacity:.7;margin-top:2px;display:block}
+.pay-btn{width:100%;padding:13px;border-radius:999px;background:#000;color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px}
+body.dark .pay-btn{background:#fff;color:#000}
+.close-paywall{margin-top:14px;font-size:13px;color:#aaa;cursor:pointer;background:none;border:none;display:block;width:100%}
+
+/* FEATURES */
+.features{padding:60px 40px;max-width:900px;margin:0 auto}
+.feature-row{display:flex;align-items:center;gap:40px;margin-bottom:60px}
+.feature-row.reverse{flex-direction:row-reverse}
+.feature-text h2{font-size:22px;font-weight:800;margin-bottom:8px}
+.feature-text p{font-size:14px;color:#888;line-height:1.6;max-width:280px}
+.feature-visual{flex:1;background:#F4F4F2;border-radius:16px;height:200px;display:flex;align-items:center;justify-content:center;font-size:60px}
+body.dark .feature-visual{background:#1a1a1a}
+
+footer{border-top:1px solid #eee;padding:20px 40px;display:flex;justify-content:space-between;align-items:center}
+body.dark footer{border-color:#222}
+footer .flogo{font-size:14px;font-weight:700}
+footer .flogo span{color:#888}
+footer .links{display:flex;gap:16px;font-size:12px}
+footer .links a{color:#aaa;text-decoration:none;cursor:pointer}
+
+@media(max-width:660px){
+  nav{padding:14px 16px}
+  .nav-links{display:none}
+  .hero h1{font-size:26px}
+  .compare-section{padding:20px 16px 40px}
+  .cards-row{flex-direction:column;gap:12px}
+  .vs-badge{width:100%;padding:8px 0}
+  .result-cols{grid-template-columns:1fr}
+  .features{padding:40px 20px}
+  .feature-row,.feature-row.reverse{flex-direction:column}
+  .pricing-cards{padding:0 16px 40px}
+  .pricing-card{min-width:100%}
+  .about-grid{grid-template-columns:1fr;padding:0 20px 40px}
+  .about-hero,.about-team,.about-mission{padding-left:20px;padding-right:20px}
+  .pricing-faq{padding:0 20px 40px}
+  footer{flex-direction:column;gap:10px;text-align:center;padding:20px}
+  .result-actions{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <nav>
+    <div class="logo" onclick="showPage('home')">SnapToCompare <span>AI</span></div>
+    <div class="nav-links">
+      <button class="nav-pill" onclick="scrollToEl('.features')">Features</button>
+      <button class="nav-pill" onclick="showPage('pricing')">Pricing</button>
+      <button class="nav-pill" onclick="showPage('about')">About</button>
+      <button class="dark-toggle" id="dark-btn" onclick="toggleDark()">🌙 Dark</button>
+    </div>
+    <button class="nav-cta" onclick="scrollToEl('.compare-section')">Start Comparing</button>
+  </nav>
+
+  <div class="hero">
+    <h1>AI-Powered Deep Analysis</h1>
+    <p>Snap. Compare. Decide.</p>
+    <div class="hero-btns">
+      <button class="btn-black" onclick="scrollToEl('.compare-section')">Start Comparing</button>
+      <button class="btn-outline" onclick="scrollToEl('.features')">Learn More</button>
+    </div>
+  </div>
+
+  <div class="compare-section">
+    <div class="usage-bar"><span class="usage-text" id="usage-text-el">Loading...</span></div>
+    <div class="no-photo-banner" id="no-photo-banner">⚠️ No photos added — AI will compare by name only. Add photos for better results.</div>
+    <div class="cards-row">
+      <!-- Card A -->
+      <div class="upload-card" id="card-a">
+        <label>Product A</label>
+        <img class="preview-img" id="home-preview-a"/>
+        <div class="card-btn" onclick="openUploadPage('a')">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/></svg>
+          <span id="card-a-label">Add Product A</span>
+          <small>Photo or name</small>
+        </div>
+        <input class="name-input" id="name-a" type="text" placeholder="Product name" readonly onclick="openUploadPage('a')"/>
+      </div>
+      <div class="vs-badge"><div class="vs-inner">VS</div></div>
+      <!-- Card B -->
+      <div class="upload-card" id="card-b">
+        <label>Product B</label>
+        <img class="preview-img" id="home-preview-b"/>
+        <div class="card-btn" onclick="openUploadPage('b')">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/></svg>
+          <span id="card-b-label">Add Product B</span>
+          <small>Photo or name</small>
+        </div>
+        <input class="name-input" id="name-b" type="text" placeholder="Product name" readonly onclick="openUploadPage('b')"/>
+      </div>
+    </div>
+    <button class="compare-btn" id="compare-btn" disabled onclick="runCompare()">Compare Now →</button>
+
+    <!-- RESULT BOX -->
+    <div class="result-box" id="result-box">
+      <div class="loading-box" id="loading-box">Analyzing<span class="loading-dots"></span></div>
+      <div id="result-rendered" style="display:none">
+        <div class="result-cols">
+          <div class="result-col">
+            <div class="result-col-title">Product A</div>
+            <div class="result-col-name" id="res-name-a"></div>
+            <ul id="res-points-a"></ul>
+            <div class="score-row">
+              <span class="score-label">Score</span>
+              <div class="score-bar-bg"><div class="score-bar-fill" id="score-bar-a"></div></div>
+              <span class="score-num" id="score-num-a">—</span>
+            </div>
+          </div>
+          <div class="result-col">
+            <div class="result-col-title">Product B</div>
+            <div class="result-col-name" id="res-name-b"></div>
+            <ul id="res-points-b"></ul>
+            <div class="score-row">
+              <span class="score-label">Score</span>
+              <div class="score-bar-bg"><div class="score-bar-fill" id="score-bar-b"></div></div>
+              <span class="score-num" id="score-num-b">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="winner-box">
+          <div class="winner-trophy">🏆</div>
+          <div class="winner-label">Winner</div>
+          <div class="winner-name" id="res-winner"></div>
+          <div class="winner-reason" id="res-reason"></div>
+        </div>
+        <div class="result-actions">
+          <button class="compare-again-btn" onclick="resetCompare()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+            Compare Again
+          </button>
+          <button class="share-btn" onclick="openShare()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"/></svg>
+            Share Result
+          </button>
+        </div>
+        <button class="chat-trigger" id="chat-trigger" onclick="openChat()">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
+          Discuss with AI — 30 min free
+        </button>
+        <div class="chat-panel" id="chat-panel">
+          <div class="chat-header">
+            <div class="chat-header-left">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
+              <span class="chat-header-title">Discuss with AI</span>
+            </div>
+            <span class="chat-timer" id="chat-timer">30:00</span>
+          </div>
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-expired" id="chat-expired">
+            <p>Your 30-minute free chat has ended.</p>
+            <button onclick="subscribePro()">Get Pro — $8 / ₹669/mo</button>
+          </div>
+          <div class="chat-input-row" id="chat-input-row">
+            <input class="chat-input" id="chat-input" type="text" placeholder="Ask anything about these products…" onkeydown="if(event.key==='Enter')sendChat()"/>
+            <button class="chat-send" id="chat-send" onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="history-section" id="history-section" style="display:none">
+      <div class="history-header">
+        <span class="history-title">Recent Comparisons</span>
+        <button class="history-clear" onclick="clearHistory()">Clear all</button>
+      </div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features">
+    <div class="feature-row">
+      <div class="feature-text"><h2>On-the-fly analysis</h2><p>Snap a photo or type a name. Our AI instantly reads the product and prepares a deep comparison in seconds.</p></div>
+      <div class="feature-visual">📸</div>
+    </div>
+    <div class="feature-row reverse">
+      <div class="feature-text"><h2>Scores & AI verdict</h2><p>See confidence scores for each product, a clear winner with reasoning, and chat with AI for 30 minutes free.</p></div>
+      <div class="feature-visual">🏆</div>
+    </div>
+    <div class="feature-row">
+      <div class="feature-text"><h2>History & Sharing</h2><p>Your last 20 comparisons are saved locally. Share any result as a summary card with friends.</p></div>
+      <div class="feature-visual">📤</div>
+    </div>
+  </div>
+  <footer>
+    <div class="flogo">SnapToCompare <span>AI</span></div>
+    <div class="links"><a onclick="showPage('pricing')">Pricing</a><a onclick="showPage('about')">About</a><a href="#">Privacy</a></div>
+  </footer>
+</div>
+
+<!-- UPLOAD PAGE -->
+<div id="page-upload">
+  <div class="upload-page-nav">
+    <button class="back-btn" onclick="closeUploadPage()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>Back
+    </button>
+    <span class="upload-page-title" id="upload-page-title">Add Product A</span>
+    <div style="width:60px"></div>
+  </div>
+  <div class="upload-page-body">
+    <span class="upload-page-label" id="upload-side-label">PRODUCT A</span>
+    <div class="upload-preview-wrap" id="upload-preview-wrap">
+      <img id="upload-preview-img"/>
+      <button class="change-photo-btn" onclick="resetPhoto()">Change Photo</button>
+    </div>
+    <div class="big-upload-btn" id="btn-camera" onclick="openWebcam()">
+      <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/></svg>
+      <span class="big-label">Take Photo</span><span class="big-sub">Opens your camera</span>
+    </div>
+    <div class="upload-or">or</div>
+    <div class="big-upload-btn" id="btn-gallery" onclick="document.getElementById('input-gallery').click()">
+      <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+      <span class="big-label">Choose from Gallery</span><span class="big-sub">Browse your photos</span>
+    </div>
+    <input type="file" id="input-gallery" accept="image/*" style="display:none" onchange="handleUploadFile(this)"/>
+    <div class="upload-or">or type a name</div>
+    <input class="upload-name-input" id="upload-name-input" type="text" placeholder="Product name (e.g. iPhone 15 Pro)" oninput="checkUploadReady()"/>
+    <button class="confirm-btn" id="confirm-btn" disabled onclick="confirmUpload()">Confirm →</button>
+  </div>
+</div>
+
+<!-- PRICING PAGE -->
+<div id="page-pricing" class="page">
+  <div class="pg-nav">
+    <div class="logo" onclick="showPage('home')">SnapToCompare <span>AI</span></div>
+    <div class="nav-links">
+      <button class="nav-pill" onclick="showPage('home')">Home</button>
+      <button class="nav-pill" onclick="showPage('about')">About</button>
+      <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+    </div>
+    <button class="nav-cta" onclick="showPage('home')">Start Comparing</button>
+  </div>
+  <div class="pricing-hero">
+    <h1>Simple, honest pricing</h1>
+    <p>Start free. Upgrade when you're ready.</p>
+  </div>
+  <div class="pricing-cards">
+    <div class="pricing-card">
+      <div class="tier">Free</div>
+      <div class="price">₹0 / $0</div>
+      <div class="price-sub">Forever free</div>
+      <hr/>
+      <ul>
+        <li><span class="ck">✓</span>15 comparisons / month</li>
+        <li><span class="ck">✓</span>Photo + name input</li>
+        <li><span class="ck">✓</span>AI analysis &amp; verdict</li>
+        <li><span class="ck">✓</span>Confidence scores</li>
+        <li><span class="ck">✓</span>30 min free AI chat</li>
+      </ul>
+      <button class="pricing-cta" onclick="showPage('home')">Get Started Free</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="tier">Pro</div>
+      <div class="price"><sup>$</sup>8</div>
+      <div class="price-sub">per month · or ₹669/mo</div>
+      <hr/>
+      <ul>
+        <li><span class="ck">✓</span>Unlimited comparisons</li>
+        <li><span class="ck">✓</span>Everything in Free</li>
+        <li><span class="ck">✓</span>Unlimited AI chat</li>
+        <li><span class="ck">✓</span>Comparison history</li>
+        <li><span class="ck">✓</span>Share result cards</li>
+        <li><span class="ck">✓</span>Priority AI responses</li>
+      </ul>
+      <button class="pricing-cta" onclick="showPage('home');setTimeout(subscribePro,200)">Subscribe for $8 / ₹669</button>
+    </div>
+  </div>
+  <div class="pricing-faq">
+    <h2>Frequently asked questions</h2>
+    <div class="faq-item"><div class="faq-q">Can I cancel anytime?</div><div class="faq-a">Yes. Cancel at any time and keep Pro access until end of billing period.</div></div>
+    <div class="faq-item"><div class="faq-q">How does the free tier work?</div><div class="faq-a">15 free comparisons per month with 30 min AI chat each. No credit card needed.</div></div>
+    <div class="faq-item"><div class="faq-q">Is my data private?</div><div class="faq-a">Photos are only used for the comparison and never stored after analysis.</div></div>
+    <div class="faq-item"><div class="faq-q">What currencies are supported?</div><div class="faq-a">USD ($8/mo) and INR (₹669/mo) — same value in both currencies.</div></div>
+  </div>
+  <footer>
+    <div class="flogo">SnapToCompare <span>AI</span></div>
+    <div class="links"><a onclick="showPage('home')">Home</a><a onclick="showPage('about')">About</a><a href="#">Privacy</a></div>
+  </footer>
+</div>
+
+<!-- ABOUT PAGE -->
+<div id="page-about" class="page">
+  <div class="pg-nav">
+    <div class="logo" onclick="showPage('home')">SnapToCompare <span>AI</span></div>
+    <div class="nav-links">
+      <button class="nav-pill" onclick="showPage('home')">Home</button>
+      <button class="nav-pill" onclick="showPage('pricing')">Pricing</button>
+      <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+    </div>
+    <button class="nav-cta" onclick="showPage('home')">Start Comparing</button>
+  </div>
+  <div class="about-hero">
+    <h1>We help you decide faster</h1>
+    <p>SnapToCompare AI was built for the moments when you're standing in a store, scrolling online, or arguing with a friend about which product is actually better.</p>
+  </div>
+  <div class="about-grid">
+    <div class="about-card"><div class="icon">⚡</div><h3>Instant</h3><p>Snap two products and get a clear answer in under 10 seconds.</p></div>
+    <div class="about-card"><div class="icon">🎯</div><h3>Accurate</h3><p>Powered by Claude AI — real insights, not generic fluff.</p></div>
+    <div class="about-card"><div class="icon">🔒</div><h3>Private</h3><p>Photos are never stored. Processed in real-time and discarded immediately.</p></div>
+  </div>
+  <div class="about-mission" style="margin:0 40px 60px">
+    <h2>Our mission</h2>
+    <p>Decision fatigue is real. SnapToCompare AI gives your time back — spend less time researching and more time enjoying what you buy.</p>
+  </div>
+  <div class="about-team">
+    <h2>Built with AI, for humans</h2>
+    <p>Whether it's a photo from your camera or just a product name, our AI builds a complete picture and delivers a verdict you can trust.</p>
+  </div>
+  <footer>
+    <div class="flogo">SnapToCompare <span>AI</span></div>
+    <div class="links"><a onclick="showPage('home')">Home</a><a onclick="showPage('pricing')">Pricing</a><a href="#">Privacy</a></div>
+  </footer>
+</div>
+
+<!-- WEBCAM -->
+<div class="webcam-overlay" id="webcam-overlay">
+  <div class="webcam-box">
+    <video id="webcam-video" autoplay playsinline></video>
+    <canvas id="webcam-canvas"></canvas>
+  </div>
+  <div class="webcam-err" id="webcam-err">Could not access camera. Please allow camera permission.</div>
+  <div class="webcam-tip">Position your product and tap the button to snap</div>
+  <div class="webcam-controls">
+    <button class="webcam-cancel" onclick="closeWebcam()">Cancel</button>
+    <button class="snap-btn" onclick="snapPhoto()">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- PAYWALL -->
+<div class="paywall-overlay" id="paywall">
+  <div class="paywall-card">
+    <h2>You've used 15 free comparisons</h2>
+    <p>Unlock unlimited comparisons with Pro.</p>
+    <p style="font-size:12px;color:#aaa;margin-top:4px">Choose your currency:</p>
+    <div class="price-row">
+      <div class="price-pill selected" id="pill-usd" onclick="selectPlan('usd')"><span class="amount">$8</span><span class="plabel">per month · USD</span></div>
+      <div class="price-pill" id="pill-inr" onclick="selectPlan('inr')"><span class="amount">₹669</span><span class="plabel">per month · INR</span></div>
+    </div>
+    <button class="pay-btn" onclick="fakeSubscribe()">Subscribe Now</button>
+    <button class="close-paywall" onclick="closePaywall()">Maybe later</button>
+  </div>
+</div>
+
+<!-- SHARE OVERLAY -->
+<div class="share-overlay" id="share-overlay">
+  <div class="share-inner">
+    <div class="share-preview">
+      <div class="share-badge">SnapToCompare AI</div>
+      <div class="share-vs-row">
+        <span class="share-prod" id="sh-name-a"></span>
+        <span class="share-vs-pill">VS</span>
+        <span class="share-prod" id="sh-name-b"></span>
+      </div>
+      <div class="share-trophy">🏆</div>
+      <div class="share-winner-label">Winner</div>
+      <div class="share-winner-name" id="sh-winner"></div>
+      <div class="share-winner-reason" id="sh-reason"></div>
+    </div>
+    <div class="share-actions">
+      <button class="sec" onclick="copyShareText()">📋 Copy Text</button>
+      <button class="pri" onclick="closeShare()">Done</button>
+    </div>
+    <div class="share-close-row"><button onclick="closeShare()">Close</button></div>
+  </div>
+</div>
+
+<script>
+const MAX_FREE = 15;
+let usageCount = parseInt(localStorage.getItem('stc_usage') || '0');
+let subscribed = localStorage.getItem('stc_subscribed') === 'true';
+let isDark = localStorage.getItem('stc_dark') === 'true';
+let dataA = null, dataB = null, currentSide = 'a', tempData = null;
+let chatContext = null, chatMessages = [], chatTimerInterval = null, chatSecondsLeft = 1800;
+let history = JSON.parse(localStorage.getItem('stc_history') || '[]');
+
+// Init
+if (isDark) document.body.classList.add('dark');
+updateDarkBtn();
+updateUsageDisplay();
+renderHistory();
+
+function scrollToEl(sel) { document.querySelector(sel).scrollIntoView({behavior:'smooth'}); }
+
+/* DARK MODE */
+function toggleDark() {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  localStorage.setItem('stc_dark', isDark);
+  updateDarkBtn();
+}
+function updateDarkBtn() {
+  const btn = document.getElementById('dark-btn');
+  if (btn) btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+}
+
+/* PAGES */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function updateUsageDisplay() {
+  const el = document.getElementById('usage-text-el');
+  if (!el) return;
+  el.innerHTML = subscribed
+    ? '<span style="font-weight:700">✓ Pro</span> — Unlimited comparisons'
+    : 'Free comparisons used: <span class="usage-count">' + usageCount + '</span> / ' + MAX_FREE;
+}
+
+/* UPLOAD PAGE */
+function openUploadPage(side) {
+  currentSide = side;
+  tempData = null;
+  document.getElementById('upload-page-title').textContent = side === 'a' ? 'Add Product A' : 'Add Product B';
+  document.getElementById('upload-side-label').textContent = side === 'a' ? 'PRODUCT A' : 'PRODUCT B';
+  document.getElementById('upload-name-input').value = document.getElementById('name-' + side).value;
+  document.getElementById('upload-preview-wrap').style.display = 'none';
+  document.getElementById('btn-camera').style.display = 'flex';
+  document.getElementById('btn-gallery').style.display = 'flex';
+  document.getElementById('input-gallery').value = '';
+  checkUploadReady();
+  document.getElementById('page-upload').classList.add('active');
+  window.scrollTo(0, 0);
+}
+function closeUploadPage() { document.getElementById('page-upload').classList.remove('active'); }
+function handleUploadFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    tempData = e.target.result;
+    document.getElementById('upload-preview-img').src = tempData;
+    document.getElementById('upload-preview-wrap').style.display = 'block';
+    document.getElementById('btn-camera').style.display = 'none';
+    document.getElementById('btn-gallery').style.display = 'none';
+    checkUploadReady();
+  };
+  reader.readAsDataURL(file);
+}
+function resetPhoto() {
+  tempData = null;
+  document.getElementById('upload-preview-wrap').style.display = 'none';
+  document.getElementById('btn-camera').style.display = 'flex';
+  document.getElementById('btn-gallery').style.display = 'flex';
+  document.getElementById('input-gallery').value = '';
+  checkUploadReady();
+}
+function checkUploadReady() {
+  const name = document.getElementById('upload-name-input').value.trim();
+  document.getElementById('confirm-btn').disabled = !(tempData || name);
+}
+function confirmUpload() {
+  const name = document.getElementById('upload-name-input').value.trim();
+  if (currentSide === 'a') {
+    dataA = tempData;
+    document.getElementById('name-a').value = name;
+    const hp = document.getElementById('home-preview-a');
+    hp.src = dataA || ''; hp.style.display = dataA ? 'block' : 'none';
+    document.getElementById('card-a').classList.toggle('active', !!(dataA || name));
+    document.getElementById('card-a-label').textContent = dataA ? '✓ Photo added' : (name ? '✓ ' + name : 'Add Product A');
+  } else {
+    dataB = tempData;
+    document.getElementById('name-b').value = name;
+    const hp = document.getElementById('home-preview-b');
+    hp.src = dataB || ''; hp.style.display = dataB ? 'block' : 'none';
+    document.getElementById('card-b').classList.toggle('active', !!(dataB || name));
+    document.getElementById('card-b-label').textContent = dataB ? '✓ Photo added' : (name ? '✓ ' + name : 'Add Product B');
+  }
+  checkReady();
+  closeUploadPage();
+}
+function checkReady() {
+  const nA = document.getElementById('name-a').value.trim();
+  const nB = document.getElementById('name-b').value.trim();
+  const ready = !!((dataA || nA) && (dataB || nB));
+  document.getElementById('compare-btn').disabled = !ready;
+  document.getElementById('no-photo-banner').style.display = (ready && nA && nB && !dataA && !dataB) ? 'block' : 'none';
+}
+
+/* RESET */
+function resetCompare() {
+  dataA = null; dataB = null;
+  ['name-a','name-b'].forEach(id => document.getElementById(id).value = '');
+  ['home-preview-a','home-preview-b'].forEach(id => { document.getElementById(id).src=''; document.getElementById(id).style.display='none'; });
+  ['card-a','card-b'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('card-a-label').textContent = 'Add Product A';
+  document.getElementById('card-b-label').textContent = 'Add Product B';
+  document.getElementById('result-box').style.display = 'none';
+  document.getElementById('no-photo-banner').style.display = 'none';
+  document.getElementById('compare-btn').disabled = true;
+  document.getElementById('chat-trigger').classList.remove('visible');
+  document.getElementById('chat-panel').classList.remove('open');
+  document.getElementById('chat-messages').innerHTML = '';
+  document.getElementById('chat-input-row').style.display = 'flex';
+  document.getElementById('chat-expired').style.display = 'none';
+  clearInterval(chatTimerInterval);
+  scrollToEl('.compare-section');
+}
+
+/* COMPARE */
+async function runCompare() {
+  if (!subscribed && usageCount >= MAX_FREE) { document.getElementById('paywall').classList.add('show'); return; }
+  usageCount++;
+  localStorage.setItem('stc_usage', usageCount);
+  updateUsageDisplay();
+
+  const nameA = document.getElementById('name-a').value.trim() || 'Product A';
+  const nameB = document.getElementById('name-b').value.trim() || 'Product B';
+  const resultBox = document.getElementById('result-box');
+  resultBox.style.display = 'block';
+  document.getElementById('loading-box').style.display = 'block';
+  document.getElementById('result-rendered').style.display = 'none';
+  document.getElementById('chat-trigger').classList.remove('visible');
+  document.getElementById('chat-panel').classList.remove('open');
+  document.getElementById('chat-messages').innerHTML = '';
+  document.getElementById('chat-input-row').style.display = 'flex';
+  document.getElementById('chat-expired').style.display = 'none';
+  clearInterval(chatTimerInterval);
+  document.getElementById('compare-btn').disabled = true;
+  resultBox.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+  const content = [];
+  if (dataA) { content.push({type:'image',source:{type:'base64',media_type:dataA.split(';')[0].split(':')[1],data:dataA.split(',')[1]}}); content.push({type:'text',text:'This is ' + nameA + '.'}); }
+  if (dataB) { content.push({type:'image',source:{type:'base64',media_type:dataB.split(';')[0].split(':')[1],data:dataB.split(',')[1]}}); content.push({type:'text',text:'This is ' + nameB + '.'}); }
+  const noPhoto = !dataA && !dataB ? ' (no photos, compare by name/knowledge)' : '';
+  content.push({type:'text',text:'Compare ' + nameA + ' vs ' + nameB + noPhoto + '. Give each a score out of 10. Respond ONLY in this JSON with no extra text:\n{"nameA":"' + nameA + '","nameB":"' + nameB + '","scoreA":7.5,"scoreB":8.2,"pointsA":["point1","point2","point3"],"pointsB":["point1","point2","point3"],"winner":"winner name","reason":"one sentence reason."}'});
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content}]})
+    });
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || '').join('') || '';
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) {
+      const r = JSON.parse(match[0]);
+      document.getElementById('res-name-a').textContent = r.nameA;
+      document.getElementById('res-name-b').textContent = r.nameB;
+      document.getElementById('res-points-a').innerHTML = r.pointsA.map(p => '<li>' + p + '</li>').join('');
+      document.getElementById('res-points-b').innerHTML = r.pointsB.map(p => '<li>' + p + '</li>').join('');
+      document.getElementById('res-winner').textContent = r.winner;
+      document.getElementById('res-reason').textContent = r.reason;
+      const sA = parseFloat(r.scoreA) || 5, sB = parseFloat(r.scoreB) || 5;
+      document.getElementById('score-num-a').textContent = sA.toFixed(1);
+      document.getElementById('score-num-b').textContent = sB.toFixed(1);
+      setTimeout(() => { document.getElementById('score-bar-a').style.width = (sA/10*100) + '%'; document.getElementById('score-bar-b').style.width = (sB/10*100) + '%'; }, 100);
+      document.getElementById('loading-box').style.display = 'none';
+      document.getElementById('result-rendered').style.display = 'block';
+      document.getElementById('chat-trigger').classList.add('visible');
+      chatContext = {nameA: r.nameA, nameB: r.nameB, pointsA: r.pointsA, pointsB: r.pointsB, winner: r.winner, reason: r.reason};
+      saveHistory(r.nameA, r.nameB, r.winner, sA, sB, r.reason);
+    } else {
+      document.getElementById('loading-box').textContent = 'Could not parse response. Try again.';
+    }
+  } catch(e) {
+    document.getElementById('loading-box').textContent = 'Error connecting to AI. Please try again.';
+  }
+  document.getElementById('compare-btn').disabled = false;
+  if (!subscribed && usageCount >= MAX_FREE) setTimeout(() => document.getElementById('paywall').classList.add('show'), 1500);
+}
+
+/* HISTORY */
+function saveHistory(nameA, nameB, winner, sA, sB, reason) {
+  history.unshift({nameA, nameB, winner, sA, sB, reason, date: Date.now()});
+  if (history.length > 20) history = history.slice(0,20);
+  localStorage.setItem('stc_history', JSON.stringify(history));
+  renderHistory();
+}
+function renderHistory() {
+  const sec = document.getElementById('history-section');
+  const list = document.getElementById('history-list');
+  if (!history.length) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+  list.innerHTML = history.slice(0,5).map((h,i) => {
+    const d = new Date(h.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    return '<div class="history-item" onclick="loadHistory(' + i + ')"><div><div class="history-names">' + h.nameA + ' vs ' + h.nameB + '</div><div class="history-winner">🏆 ' + h.winner + '</div></div><div class="history-date">' + d + '</div></div>';
+  }).join('');
+}
+function loadHistory(i) {
+  const h = history[i]; if (!h) return;
+  dataA = null; dataB = null;
+  document.getElementById('name-a').value = h.nameA;
+  document.getElementById('name-b').value = h.nameB;
+  document.getElementById('card-a').classList.add('active');
+  document.getElementById('card-b').classList.add('active');
+  document.getElementById('card-a-label').textContent = '✓ ' + h.nameA;
+  document.getElementById('card-b-label').textContent = '✓ ' + h.nameB;
+  document.getElementById('res-name-a').textContent = h.nameA;
+  document.getElementById('res-name-b').textContent = h.nameB;
+  document.getElementById('res-winner').textContent = h.winner;
+  document.getElementById('res-reason').textContent = h.reason;
+  document.getElementById('res-points-a').innerHTML = '';
+  document.getElementById('res-points-b').innerHTML = '';
+  document.getElementById('score-num-a').textContent = h.sA.toFixed(1);
+  document.getElementById('score-num-b').textContent = h.sB.toFixed(1);
+  setTimeout(() => { document.getElementById('score-bar-a').style.width = (h.sA/10*100) + '%'; document.getElementById('score-bar-b').style.width = (h.sB/10*100) + '%'; }, 100);
+  document.getElementById('loading-box').style.display = 'none';
+  document.getElementById('result-box').style.display = 'block';
+  document.getElementById('result-rendered').style.display = 'block';
+  document.getElementById('chat-trigger').classList.add('visible');
+  chatContext = {nameA: h.nameA, nameB: h.nameB, pointsA: [], pointsB: [], winner: h.winner, reason: h.reason};
+  checkReady();
+  document.getElementById('result-box').scrollIntoView({behavior:'smooth'});
+}
+function clearHistory() { history=[]; localStorage.removeItem('stc_history'); renderHistory(); }
+
+/* SHARE */
+function openShare() {
+  document.getElementById('sh-name-a').textContent = document.getElementById('res-name-a').textContent;
+  document.getElementById('sh-name-b').textContent = document.getElementById('res-name-b').textContent;
+  document.getElementById('sh-winner').textContent = document.getElementById('res-winner').textContent;
+  document.getElementById('sh-reason').textContent = document.getElementById('res-reason').textContent;
+  document.getElementById('share-overlay').classList.add('show');
+}
+function closeShare() { document.getElementById('share-overlay').classList.remove('show'); }
+function copyShareText() {
+  const a = document.getElementById('sh-name-a').textContent;
+  const b = document.getElementById('sh-name-b').textContent;
+  const w = document.getElementById('sh-winner').textContent;
+  const r = document.getElementById('sh-reason').textContent;
+  const text = '🏆 ' + w + ' wins!\n\n' + a + ' vs ' + b + '\n\n' + r + '\n\nCompared with SnapToCompare AI';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target; btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy Text', 2000);
+  }).catch(() => alert(text));
+}
+
+/* CHAT */
+function openChat() {
+  document.getElementById('chat-trigger').classList.remove('visible');
+  document.getElementById('chat-panel').classList.add('open');
+  chatMessages = [];
+  const nA = chatContext?.nameA || 'Product A', nB = chatContext?.nameB || 'Product B', w = chatContext?.winner || '';
+  addMsg('ai', 'I just compared **' + nA + '** vs **' + nB + '** and picked **' + w + '** as the winner. Ask me anything — price, durability, alternatives! ⏱️ 30 min free.');
+  chatSecondsLeft = 1800;
+  updateTimer();
+  chatTimerInterval = setInterval(() => { chatSecondsLeft--; updateTimer(); if (chatSecondsLeft <= 0) { clearInterval(chatTimerInterval); expireChat(); } }, 1000);
+}
+function updateTimer() {
+  const el = document.getElementById('chat-timer');
+  if (!el) return;
+  const m = Math.floor(chatSecondsLeft/60), s = chatSecondsLeft%60;
+  el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  el.classList.toggle('urgent', chatSecondsLeft <= 300);
+}
+function expireChat() {
+  document.getElementById('chat-input-row').style.display = 'none';
+  document.getElementById('chat-expired').style.display = 'block';
+  addMsg('ai', '⏰ Your 30-minute free session ended. Subscribe to Pro to keep chatting!');
+}
+function addMsg(role, text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  chatMessages.push({role: role === 'ai' ? 'assistant' : 'user', content: text.replace(/\*\*(.*?)\*\*/g, '$1')});
+}
+function showTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'chat-msg ai typing'; d.id = 'typing'; d.textContent = 'Thinking…';
+  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+}
+function removeTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+async function sendChat() {
+  if (chatSecondsLeft <= 0) return;
+  const input = document.getElementById('chat-input'), btn = document.getElementById('chat-send');
+  const text = input.value.trim(); if (!text) return;
+  input.value = ''; btn.disabled = true;
+  addMsg('user', text); showTyping();
+  const sys = 'You are a product comparison assistant. User compared:\n- ' + (chatContext?.nameA||'A') + ': ' + (chatContext?.pointsA||[]).join('; ') + '\n- ' + (chatContext?.nameB||'B') + ': ' + (chatContext?.pointsB||[]).join('; ') + '\nWinner: ' + (chatContext?.winner||'') + '. ' + (chatContext?.reason||'') + '\nAnswer concisely, max 120 words.';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-6',max_tokens:300,system:sys,messages:chatMessages.slice(-8)})
+    });
+    const data = await res.json();
+    removeTyping();
+    addMsg('ai', data.content?.map(b=>b.text||'').join('')||'Sorry, could not get a response.');
+  } catch(e) { removeTyping(); addMsg('ai','Error connecting to AI. Try again.'); }
+  btn.disabled = false; input.focus();
+}
+
+/* WEBCAM */
+let webcamStream = null;
+async function openWebcam() {
+  const overlay = document.getElementById('webcam-overlay'), video = document.getElementById('webcam-video'), err = document.getElementById('webcam-err');
+  err.style.display = 'none'; video.style.display = 'block'; overlay.classList.add('show');
+  try { webcamStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false}); video.srcObject = webcamStream; }
+  catch(e) { video.style.display='none'; err.style.display='block'; }
+}
+function snapPhoto() {
+  const video = document.getElementById('webcam-video'), canvas = document.getElementById('webcam-canvas');
+  if (!webcamStream) return;
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+  const url = canvas.toDataURL('image/jpeg',0.92);
+  closeWebcam();
+  tempData = url;
+  document.getElementById('upload-preview-img').src = url;
+  document.getElementById('upload-preview-wrap').style.display = 'block';
+  document.getElementById('btn-camera').style.display = 'none';
+  document.getElementById('btn-gallery').style.display = 'none';
+  checkUploadReady();
+}
+function closeWebcam() {
+  if (webcamStream) { webcamStream.getTracks().forEach(t=>t.stop()); webcamStream=null; }
+  document.getElementById('webcam-overlay').classList.remove('show');
+  document.getElementById('webcam-video').srcObject = null;
+}
+
+/* PAYWALL */
+function selectPlan(p) {
+  document.getElementById('pill-usd').classList.toggle('selected', p==='usd');
+  document.getElementById('pill-inr').classList.toggle('selected', p==='inr');
+}
+function fakeSubscribe() {
+  subscribed=true; localStorage.setItem('stc_subscribed','true');
+  closePaywall(); updateUsageDisplay();
+  alert('🎉 Subscribed! Enjoy unlimited comparisons and chats.');
+}
+function subscribePro() { document.getElementById('paywall').classList.add('show'); }
+function closePaywall() { document.getElementById('paywall').classList.remove('show'); }
+</script>
+</body>
+</html>
